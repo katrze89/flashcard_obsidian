@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from pathlib import Path
 
 from app.models.note_models import Note
 
@@ -7,7 +8,7 @@ from app.models.note_models import Note
 class NotesLoaderABC(ABC):
     @property
     @abstractmethod
-    def folder_path(self) -> str:
+    def folder_path(self) -> Path:
         raise NotImplementedError
 
     @property

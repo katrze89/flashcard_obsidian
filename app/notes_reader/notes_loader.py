@@ -2,6 +2,8 @@ import os
 import re
 from collections.abc import Iterable
 from datetime import datetime
+from pathlib import Path
+from typing import cast
 
 from app.models.note_models import Note
 from app.notes_reader.notes_loader_abc import NotesLoaderABC
@@ -11,17 +13,19 @@ from app.tools.auto_repr import auto_repr
 @auto_repr
 class MarkdownNotesLoader(NotesLoaderABC):
     def __init__(self, folder_path: str, tags: Iterable[str]) -> None:
-        self.folder_path = folder_path
+        self.folder_path = cast(Path, folder_path)
         self.tags = tags
 
     @property
-    def folder_path(self) -> str:
+    def folder_path(self) -> Path:
         return self._folder_path
 
     @folder_path.setter
     def folder_path(self, folder_path: str) -> None:
-        #  TODO: add path validation, think about Path class
-        self._folder_path = folder_path
+        path = Path(folder_path)
+        if not path.is_dir():
+            raise ValueError(f"{folder_path} is not a valid path")
+        self._folder_path = path
 
     @property
     def tags(self) -> Iterable[str]:
