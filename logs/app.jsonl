@@ -1,0 +1,1 @@
+{"level": "DEBUG", "message": "request_id: req_b69e215beb5234216b2634d856c636b4", "timestamp": "2025-02-15T19:30:05.325804+00:00", "logger": "openai._base_client", "module": "_base_client", "function": "_request", "line": 1047, "thread_name": "MainThread"}

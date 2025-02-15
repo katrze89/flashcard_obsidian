@@ -3,22 +3,22 @@ from enum import Enum
 
 
 class DifficultyEnum(Enum):
-    easy = "easy"
-    medium = "medium"
-    hard = "hard"
+    EASY = "easy"
+    MEDIUM = "medium"
+    HARD = "hard"
 
 
-@dataclass(frozen=False, kw_only=True, slots=True)
+class NonEmptyStr(str):
+    def __new__(cls, value: str) -> "NonEmptyStr":
+        if not value.strip():
+            raise ValueError("Value cannot be empty")
+        return super().__new__(cls, value)
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class FlashCard:
     difficulty_level: DifficultyEnum
-    tags: list[str]
-    front_site: str
-    back_site: str
-
-    def __post_init__(self) -> None:
-        if not self.front_site:
-            raise ValueError("Flashcard has to have a question.")
-        if not self.back_site:
-            raise ValueError("Flashcard has to have an answer.")
-        if not self.tags:
-            raise ValueError("Tags must be a non-empty set.")
+    tags: set[NonEmptyStr]
+    front_site: NonEmptyStr
+    back_site: NonEmptyStr
+    origin: NonEmptyStr  # name of the file based on which the question is based on

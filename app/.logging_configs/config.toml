@@ -6,7 +6,7 @@ format = "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s"
 datefmt = "%Y-%m-%dT %H:%M:%S%z"
 
 [formatters.json]
-"()" = "custom_logger.JSONFormatter"
+"()" = "app.custom_logger.JSONFormatter"
 
 [formatters.json.fmt_keys]
 level = "levelname"

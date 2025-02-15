@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @auto_repr
 class MarkdownNotesLoader(NotesLoaderABC):
-    def __init__(self, folder_path: str, tags: Iterable[str]) -> None:
+    def __init__(self, folder_path: str | Path, tags: Iterable[str]) -> None:
         self.folder_path = cast(Path, folder_path)
         self.tags = tags
 
@@ -24,7 +24,7 @@ class MarkdownNotesLoader(NotesLoaderABC):
         return self._folder_path
 
     @folder_path.setter
-    def folder_path(self, folder_path: str) -> None:
+    def folder_path(self, folder_path: str | Path) -> None:
         path = Path(folder_path)
         if not path.is_dir():
             raise ValueError(f"{folder_path} is not a valid path")

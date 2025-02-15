@@ -23,7 +23,7 @@ from pathlib import Path
 def logging_setup() -> None:
     if os.getenv("TESTS") == "1":
         return
-    config_file = Path(".logging_configs/config.toml")
+    config_file = Path(__file__).parent.resolve() / ".logging_configs/config.toml"
     with open(config_file, "rb") as file:
         config = tomllib.load(file)
     logging.config.dictConfig(config)
