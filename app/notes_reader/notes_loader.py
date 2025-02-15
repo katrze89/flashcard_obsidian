@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from collections.abc import Iterable
@@ -8,6 +9,8 @@ from typing import cast
 from app.models.note_models import Note
 from app.notes_reader.notes_loader_abc import NotesLoaderABC
 from app.tools.auto_repr import auto_repr
+
+logger = logging.getLogger(__name__)
 
 
 @auto_repr
@@ -69,13 +72,17 @@ class MarkdownNotesLoader(NotesLoaderABC):
 
     def get_file_list(self) -> list[str]:
         file_list: list[str] = []
-
         for filename in os.listdir(self.folder_path):
             if filename.endswith(".md"):
                 file_list.append(filename)
+
+        if not file_list:
+            logger.error("No markdown files found.")
+            raise FileNotFoundError("No markdown files found.")
         return file_list
 
-    def load_file(self, file_path: str) -> str:
+    @staticmethod
+    def load_file(file_path: str) -> str:
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
 

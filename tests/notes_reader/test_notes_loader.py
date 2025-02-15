@@ -1,4 +1,6 @@
+import builtins
 import os
+from io import StringIO
 
 import pytest
 
@@ -6,6 +8,11 @@ from app.models.note_models import Note
 from app.notes_reader.notes_loader import MarkdownNotesLoader
 
 CORRECT_PATH = "/home/kasia/Dokumenty/flashcards-ai-obsidian-pro/tests/notes_reader/data"
+
+
+@pytest.fixture
+def notes_loader():
+    return MarkdownNotesLoader(".", ["python", "#pytest", "#docker"])
 
 
 @pytest.fixture(scope="session")
@@ -18,6 +25,11 @@ def note_docker():
     
     #docker#pytest #python
     """
+
+
+@pytest.fixture()
+def file_md(note_docker):
+    return StringIO(note_docker)
 
 
 def test_tags_are_normalized():
@@ -53,49 +65,107 @@ def test_create_correct_path():
 
 
 def test_incorrect_path():
-    path = "/home/kasia/Dokumenty/flashcards-ai-obsidian-pro/tests/notes_reader/data.json"
+    path = "data.json"
     with pytest.raises(ValueError, match=" is not a valid path"):
         MarkdownNotesLoader(path, ["python", "#pytest", "#docker"])
 
 
-def test_correct_number_of_detected_files():
-    expected_len = 5
-    loader = MarkdownNotesLoader(CORRECT_PATH, ["python", "#pytest", "#docker"])
-    file_list = loader.get_file_list()
-    assert len(file_list) == expected_len
-    assert file_list == ["Pytest fixtures.md", "Pytest plugins.md", "Docker.md", "Pytest.md", "Coverage.md"]
+def test_correct_number_of_detected_files(monkeypatch, notes_loader):
+    expected_files = ["Pytest fixtures.md", "Pytest plugins.md", "Docker.md", "Pytest.md", "Coverage.md"]
+
+    def stub_listdir(*args):
+        return expected_files + ["cos.log"]
+
+    monkeypatch.setattr(os, "listdir", stub_listdir)
+
+    file_list = notes_loader.get_file_list()
+    assert file_list == expected_files
 
 
-def test_detect_no_file():
-    path = "/home/kasia/Dokumenty/flashcards-ai-obsidian-pro/tests/notes_reader"
-    loader = MarkdownNotesLoader(path, ["python", "#pytest", "#docker"])
-    file_list = loader.get_file_list()
-    assert len(file_list) == 0
+def test_when_no_files_raise_error(monkeypatch, notes_loader):
+    def stub_listdir(*args):
+        return []
+
+    monkeypatch.setattr(os, "listdir", stub_listdir)
+    with pytest.raises(FileNotFoundError, match="No markdown files found."):
+        notes_loader.get_file_list()
 
 
-def test_load_file():
-    loader = MarkdownNotesLoader(CORRECT_PATH, ["python", "#pytest", "#docker"])
-    loaded_file = loader.load_file(os.path.join(CORRECT_PATH, "Docker.md"))
-    assert isinstance(loaded_file, str)
-    assert "Logi kontenera" in loaded_file
+def test_when_no_markdown_files_raise_error(monkeypatch, notes_loader):
+    def stub_listdir(*args):
+        return ["cos.log", "main.py"]
+
+    monkeypatch.setattr(os, "listdir", stub_listdir)
+    with pytest.raises(FileNotFoundError, match="No markdown files found."):
+        notes_loader.get_file_list()
+
+
+def test_load_file(monkeypatch, file_md, note_docker):
+    def fake_open(file, mode="r", encoding=None):
+        assert mode == "r"
+        assert encoding == "utf-8"
+        return file_md
+
+    monkeypatch.setattr(builtins, "open", fake_open)
+
+    result = MarkdownNotesLoader.load_file("file1.md")
+    assert result == note_docker
+
+
+def test_load_file_non_utf8(monkeypatch):
+    def fake_open(*args, **kwargs):
+        raise UnicodeEncodeError("utf-8", "", 0, 1, "Invalid start byte")
+
+    monkeypatch.setattr(builtins, "open", fake_open)
+
+    with pytest.raises(UnicodeEncodeError):
+        MarkdownNotesLoader.load_file("file1.md")
+
+
+# TODO FIleNotFOundError
+# TODO OSError
+# TODO UnicodeDecodeError
 
 
 @pytest.mark.parametrize(
-    "tags, lenght, titles",
+    "tags, length, titles",
     [
-        (["python", "#pytest", "#docker"], 5, ["Pytest fixtures", "Pytest plugins", "Docker", "Pytest", "Coverage"]),
+        (["python", "#pytest", "#docker"], 4, ["Pytest fixtures", "Pytest plugins", "Docker", "Pytest"]),
         (["#docker"], 1, ["Docker"]),
         (["python", "#docker"], 2, ["Docker", "Pytest"]),
-        (["jakis"], 0, []),
+        (["something"], 0, []),
     ],
 )
-def test_load_notes_filter(tags, lenght, titles):
-    loader = MarkdownNotesLoader(CORRECT_PATH, tags)
+def test_load_notes_filter(monkeypatch, tags, length, titles):
+    def stub_listdir(*args):
+        return ["Pytest fixtures.md", "Pytest plugins.md", "Docker.md", "Pytest.md"]
+
+    monkeypatch.setattr(os, "listdir", stub_listdir)
+
+    def fake_open(file, mode="r", encoding=None):
+        file = file[2:-3]
+        if file in ["Docker"]:
+            return StringIO("#docker")
+        if file in ["Pytest fixtures", "Pytest plugins"]:
+            return StringIO("#pytest")
+        if file in ["Pytest"]:
+            return StringIO("#python")
+        return None
+
+    monkeypatch.setattr(builtins, "open", fake_open)
+
+    def fake_getmtime(*args):
+        return 100000000
+
+    monkeypatch.setattr(os.path, "getmtime", fake_getmtime)
+    loader = MarkdownNotesLoader(".", tags)
     notes = loader.load()
-    assert len(notes) == lenght
+
+    assert len(notes) == length
+
     for note in notes:
         assert isinstance(note, Note)
         assert note.title in titles
 
 
-# TODO model for flashcard (taki sam jak do Note tlko do Flashcarda)
+# TODO zmien tak aby mockowalo metode klasy a nie czastkowa
