@@ -6,6 +6,11 @@ from typing import Any, TypeVar
 T = TypeVar("T", bound=type[Any])
 
 
+# TODO" nie dziala jak uruchomi sie klasyczna klase
+# @auto_repr
+# class X:
+#   __init__(self, x):
+#       self.x = x
 def auto_repr(cls: T) -> T:
     members: MappingProxyType[str, Any] = vars(cls)
 
