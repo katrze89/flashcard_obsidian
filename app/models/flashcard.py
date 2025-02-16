@@ -7,6 +7,9 @@ class DifficultyEnum(str, Enum):
     MEDIUM = "medium"
     HARD = "hard"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class NonEmptyStr(str):
     def __new__(cls, value: str) -> "NonEmptyStr":

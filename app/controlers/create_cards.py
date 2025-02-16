@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def create_cards() -> list[FlashCardSrc]:
     vault_path = DIRNAME / "obsidian_vault"
-    notes_loader = MarkdownNotesLoader(vault_path, {"docker", "python", "pytest"})
+    notes_loader = MarkdownNotesLoader(vault_path, {"docker"})
     notes = notes_loader.load()
 
     client_ai = CardGen(model="gpt-4o-mini")

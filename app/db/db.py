@@ -39,8 +39,8 @@ class DB:
     def __exit__(self, exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         self._db.close()
 
-    def _transform_result(self, result: Document) -> dict :
+    def _transform_result(self, result: Document) -> dict:
         return {**result, "id": result.doc_id}
-    
+
     def _transform_results(self, result: list[Document]) -> list[dict]:
         return [{**c, "id": c.doc_id} for c in result]

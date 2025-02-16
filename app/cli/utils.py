@@ -1,28 +1,19 @@
 from typing import Any
 
 import typer
-from rich import print
 from rich.console import Console
 from rich.table import Table
-
-from app.controlers.create_cards import create_cards
-from app.controlers.read_cards import get_cards_by_id, read_all
-from app.controlers.save_cards import save_cards
-from app.controlers.save_deck import save_deck
 
 app = typer.Typer(add_completion=False)
 
 console = Console()
 
 
-def display_table(
-        *,
-        title: str,
-        columns: tuple[str],
-        items: list[Any]
-
-):
-    table = Table(*columns, title=title)
+def display_table(*, title: str, columns: dict[str, str], items: list[Any]) -> None:
+    columns_name = columns.keys()
+    columns_field = list(columns.values())
+    table = Table(*columns_name, title=title)
     for item in items:
-        table.add_row(str(item.id), item.front_side, item.difficulty_level)
+        row_item = (str(getattr(item, field)) for field in columns_field)
+        table.add_row(*row_item)
     console.print(table)
