@@ -1,3 +1,4 @@
+# TODO add filet cards by hashtags, file
 import typer
 
 from app.cli.utils import display_table
@@ -6,7 +7,7 @@ from app.controlers.read_cards import read_all
 app = typer.Typer()
 
 
-@app.command()
+@app.command(name="read-all-cards")
 def read_all_cli() -> None:
     cards = read_all()
     display_table(
