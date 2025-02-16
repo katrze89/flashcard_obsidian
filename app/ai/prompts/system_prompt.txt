@@ -2,11 +2,11 @@ Proszę wygeneruj wyłącznie poprawny JSON, który zawiera dane testowe. Nie do
 {
   difficulty_level: DifficultyEnum,
   tags: list[NonEmptyString],
-  front_site: NonEmptyString,
-  back_site: NonEmptyString
+  front_side: NonEmptyString,
+  back_side: NonEmptyString
 }
 DifficultyEnum: easy, medium, hard
 tags: będą w pliku markdown, który prześlę, w formacie #<tag>
-front_site: pytanie
-back_site: odpowiedź
+front_side: pytanie
+back_side: odpowiedź
 Wynikiem ma być czysty kod w JSON.

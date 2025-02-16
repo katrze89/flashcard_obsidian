@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-class DifficultyEnum(Enum):
+class DifficultyEnum(str, Enum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
@@ -16,9 +16,14 @@ class NonEmptyStr(str):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class FlashCard:
+class FlashCardSrc:
     difficulty_level: DifficultyEnum
-    tags: set[NonEmptyStr]
-    front_site: NonEmptyStr
-    back_site: NonEmptyStr
+    tags: list[NonEmptyStr]
+    front_side: NonEmptyStr
+    back_side: NonEmptyStr
     origin: NonEmptyStr  # name of the file based on which the question is based on
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class FlashCard(FlashCardSrc):
+    id: int

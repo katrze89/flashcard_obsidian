@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class CardGen:
     system_prompt_path: Path = Path(__file__).parent.resolve() / "prompts"
 
-    def __new__(cls, *args, **kwargs) -> "CardGen":  # type: ignore
+    def __new__(cls, *args: Any, **kwargs: Any) -> "CardGen":
         dotenv.load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env", ".env-chatgpt"))
         if os.getenv("OPENAI_API_KEY", None) is None:
             raise EnvironmentError("OPENAI_API_KEY is not set")
@@ -27,7 +27,7 @@ class CardGen:
         self.response_format = response_format if response_format is not None else {"type": "json_object"}
 
     def create_flashcard_json(self, user_prompt: str) -> Any:
-        messages = [
+        messages: list[dict[str, Any]] = [
             {"role": "system", "content": open_file(type(self).system_prompt_path / "system_prompt.txt")},
             {"role": "user", "content": user_prompt},
         ]
@@ -36,6 +36,6 @@ class CardGen:
 
         return self.client.chat.completions.create(
             model=self.model,
-            response_format=self.response_format,
+            # response_format=self.response_format,
             messages=messages,  # type: ignore
         )
